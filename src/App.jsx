@@ -36,24 +36,37 @@ function App() {
   }
 
   useEffect(() => {
-    directMappingCache([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 4);    
+    directMappingCache([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 2);    
   }, [])
   
 
   return (
     <>
+      <h1>Mapeamento Direto</h1>
       {step &&
         step.map((item, index) => {
           return (
             <div key={index}>
-              <p>Step {index}</p>
-              <p>Cache: {item.map((item, index) => {
+              <p className='stepIndex'>Step - {index}</p>
+            <table >
+              
+              <tr>
+                <th>Index</th>
+                <th>Cache</th>
+              </tr>
+
+              {item.map((item, index) => {
                 return (
-                  <span key={index}>{item} </span>
+                  <>
+                    <tr key={index}>
+                      <td>{index}</td>
+                      <td>{item}</td>
+                    </tr>
+                  </>
                 )
-              })}</p>
-              <hr></hr>
-            </div>
+              })}
+              </table>
+              </div>
           )
         })
       }
