@@ -64,8 +64,6 @@ function App() {
     setSummary(sumary);
   }, []);
 
-  console.log(summary);
-
   return (
     <>
       <div className="stepTitle">

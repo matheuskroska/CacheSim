@@ -168,6 +168,7 @@ h1 {
   box-sizing: border-box;
   min-width: 300px;
   overflow: hidden;
+  background-color: #484848;
 }
 
 .stepContainer {
@@ -250,7 +251,7 @@ select {
   border: 1px solid #ccc;
   padding: 5px;
   font-size: 15px;
-  color: #888;
+  color: #fff;
   margin-bottom: 2em;
 }
 
@@ -279,10 +280,6 @@ select {
 .row:not(.header):nth-child(odd) {
   background-color: #777777;
 }
-
-/* .row:nth-child(even) {
-  background-color: #282828;
-} */
 
 .cacheStatus {
   position: relative;
