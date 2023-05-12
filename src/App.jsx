@@ -69,12 +69,14 @@ function App() {
       <div className="stepTitle">
         <h1>Mapeamento Direto</h1>
         <select onChange={handleDirectMappingCache}>
-          <option value="0">
-            Endereços da memória = [0,1,2,3,1,4,5,6], Tamanho da cache = 5
-          </option>
-          <option value="1">[0,1,2,2,22,32,42,20,1,10,11,12,13], 10</option>
-          <option value="2">[1,6,1,11,1,16,1,21,1,26], 8</option>
-          <option value="3">[33,3,11,5], 5</option>
+          {memObj.map((item, index) => {
+            return (
+              <option key={index} value={index}>
+                Endereços da memória = {item.data.toString()}, Tamanho da cache
+                = {item.cacheSize}
+              </option>
+            );
+          })}
         </select>
 
         <div className="summary">
