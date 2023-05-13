@@ -1,13 +1,49 @@
 /* eslint-disable react/no-unknown-property */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import "./App.css";
 
 function App() {
+  const SET_CACHE_SIZE = "SET_CACHE_SIZE";
+  const ADD_MEMORY_ADDRESS = "ADD_MEMORY_ADDRESS";
+  const CLEAR_FORM = "CLEAR_FORM";
+
   const [step, setStep] = useState([]);
   const [stepStatus, setStepStatus] = useState([]);
   const [summary, setSummary] = useState([]);
 
+  const initialState = {
+    memoryAddresses: [],
+    cacheSize: "",
+  };
+
+  const formReducer = (state, action) => {
+    switch (action.type) {
+      case SET_CACHE_SIZE:
+        return { ...state, cacheSize: action.payload };
+      case ADD_MEMORY_ADDRESS:
+        return {
+          ...state,
+          memoryAddresses: [...state.memoryAddresses, action.payload],
+        };
+      case CLEAR_FORM:
+        return initialState;
+      case "CLEAR_MEMORY_ADDRESSES":
+        return {
+          ...state,
+          memoryAddresses: [],
+        };
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(formReducer, initialState);
+
   function directMappingCache(memoryAddress, cacheSize) {
+    // parse memoryAdress and cacheSize to int
+    memoryAddress = memoryAddress.map((item) => parseInt(item));
+    cacheSize = parseInt(cacheSize);
+
     const cache = Array(cacheSize).fill(-1);
     const cacheStep = [];
     const cacheStepStatus = [];
@@ -52,6 +88,55 @@ function App() {
     setSummary(sumary);
   };
 
+  const setCacheSize = (cacheSize) => ({
+    type: SET_CACHE_SIZE,
+    payload: cacheSize,
+  });
+
+  const clearForm = () => ({
+    type: CLEAR_FORM,
+  });
+
+  const clearMemoryAddresses = () => ({
+    type: "CLEAR_MEMORY_ADDRESSES",
+  });
+
+  const addMemoryAddress = (memoryAddress) => ({
+    type: ADD_MEMORY_ADDRESS,
+    payload: memoryAddress,
+  });
+
+  const handleMemAdress = (event) => {
+    event.preventDefault();
+    const memoryAddress = document.getElementById("mem").value;
+    if (memoryAddress !== "") {
+      dispatch(addMemoryAddress(parseInt(memoryAddress)));
+    }
+    document.getElementById("mem").value = "";
+  };
+
+  const handleClearForm = (e) => {
+    e.preventDefault();
+    dispatch(clearForm());
+    dispatch(setCacheSize(""));
+    dispatch(clearMemoryAddresses());
+  };
+
+  const handleCacheSize = (event) => {
+    event.preventDefault();
+    const cacheSize = document.getElementById("cacheSize").value;
+    if (cacheSize !== "") {
+      dispatch(setCacheSize(cacheSize));
+    }
+    document.getElementById("cacheSize").value = "";
+  };
+
+  const handleCalculate = (event) => {
+    event.preventDefault();
+    const sumary = directMappingCache(state.memoryAddresses, state.cacheSize);
+    setSummary(sumary);
+  };
+
   const memObj = [
     { data: [0, 1, 2, 3, 1, 4, 5, 6], cacheSize: 5 },
     { data: [0, 1, 2, 2, 22, 32, 42, 20, 1, 10, 11, 12, 13], cacheSize: 10 },
@@ -78,6 +163,38 @@ function App() {
             );
           })}
         </select>
+
+        <form className="form">
+          <div className="inputField">
+            <input id="mem" type="number" placeholder="Endereço da memória" />
+            <button onClick={handleMemAdress}>+</button>
+          </div>
+          <div className="inputField">
+            <input
+              id="cacheSize"
+              type="number"
+              placeholder="Tamanho da cache"
+            />
+            <button onClick={handleCacheSize}>+</button>
+          </div>
+          <div className="actionButtons">
+            <button onClick={handleClearForm}>Limpar</button>
+            <button onClick={handleCalculate}>Calcular</button>
+          </div>
+
+          <ul>
+            {state.memoryAddresses.length > 0 && <p>Endereços da memória:</p>}
+            {[
+              state.memoryAddresses.map((memoryAddress, index) => (
+                <li key={index}>
+                  {memoryAddress}
+                  {index !== state.memoryAddresses.length - 1 && ", "}
+                </li>
+              )),
+            ]}
+          </ul>
+          {state.cacheSize !== "" && <p>Tamanho da cache: {state.cacheSize}</p>}
+        </form>
 
         <div className="summary">
           <span>
