@@ -6,6 +6,7 @@ function App() {
   const SET_CACHE_SIZE = "SET_CACHE_SIZE";
   const ADD_MEMORY_ADDRESS = "ADD_MEMORY_ADDRESS";
   const CLEAR_FORM = "CLEAR_FORM";
+  const CLEAR_MEMORY_ADDRESSES = "CLEAR_MEMORY_ADDRESSES";
 
   const [step, setStep] = useState([]);
   const [stepStatus, setStepStatus] = useState([]);
@@ -27,7 +28,7 @@ function App() {
         };
       case CLEAR_FORM:
         return initialState;
-      case "CLEAR_MEMORY_ADDRESSES":
+      case CLEAR_MEMORY_ADDRESSES:
         return {
           ...state,
           memoryAddresses: [],
@@ -120,6 +121,9 @@ function App() {
     dispatch(clearForm());
     dispatch(setCacheSize(""));
     dispatch(clearMemoryAddresses());
+
+    const sumary = directMappingCache(memObj[0].data, memObj[0].cacheSize);
+    setSummary(sumary);
   };
 
   const handleCacheSize = (event) => {
@@ -166,7 +170,13 @@ function App() {
 
         <form className="form">
           <div className="inputField">
-            <input id="mem" type="number" placeholder="Endereço da memória" />
+            <input
+              id="mem"
+              type="number"
+              placeholder="Endereço da memória"
+              min="0"
+              max="999999"
+            />
             <button onClick={handleMemAdress}>+</button>
           </div>
           <div className="inputField">
@@ -174,6 +184,8 @@ function App() {
               id="cacheSize"
               type="number"
               placeholder="Tamanho da cache"
+              min="0"
+              max="999999"
             />
             <button onClick={handleCacheSize}>+</button>
           </div>
@@ -182,18 +194,35 @@ function App() {
             <button onClick={handleCalculate}>Calcular</button>
           </div>
 
-          <ul>
-            {state.memoryAddresses.length > 0 && <p>Endereços da memória:</p>}
-            {[
-              state.memoryAddresses.map((memoryAddress, index) => (
-                <li key={index}>
-                  {memoryAddress}
-                  {index !== state.memoryAddresses.length - 1 && ", "}
-                </li>
-              )),
-            ]}
-          </ul>
-          {state.cacheSize !== "" && <p>Tamanho da cache: {state.cacheSize}</p>}
+          {state.memoryAddresses.length > 0 && (
+            <div className="inputValues">
+              <div className="memoryAdresses">
+                {state.memoryAddresses.length > 0 && (
+                  <p>Endereços da memória:</p>
+                )}
+                <ul>
+                  {[
+                    state.memoryAddresses.map((memoryAddress, index) => (
+                      <li key={index}>
+                        {memoryAddress}
+                        {index !== state.memoryAddresses.length - 1 && ", "}
+                      </li>
+                    )),
+                  ]}
+                </ul>
+              </div>
+              {state.cacheSize.length > 0 && (
+                <div className="cacheSize">
+                  {state.cacheSize !== "" && (
+                    <>
+                      <p>Tamanho da cache:</p>
+                      <span> {state.cacheSize}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </form>
 
         <div className="summary">

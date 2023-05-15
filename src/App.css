@@ -318,3 +318,28 @@ input {
 .actionButtons button {
   width: 100%;
 }
+
+.memoryAdresses,
+.memoryAdresses ul,
+.cacheSize {
+  display: flex;
+}
+
+.memoryAdresses,
+.cacheSize {
+  column-gap: 5px;
+}
+
+.memoryAdresses p,
+.cacheSize p {
+  font-weight: 500;
+}
+
+.inputValues {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 0.5em;
+  padding: 10px;
+}
