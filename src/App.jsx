@@ -42,36 +42,55 @@ function App() {
   const [state, dispatch] = useReducer(formReducer, initialState);
 
   const directMappingCache = (memoryAddress, cacheSize) => {
+    // Converte os endereços de memória para números inteiros
     memoryAddress = memoryAddress.map((item) => parseInt(item));
+    // Converte o tamanho do cache para um número inteiro
     cacheSize = parseInt(cacheSize);
 
+    // Cria um array de cache preenchido com -1, indicando que está vazio
     const cache = Array(cacheSize).fill(-1);
+    // Cria um array para armazenar cada etapa do cache
     const cacheStep = [];
+    // Cria um array para armazenar o status de cada etapa do cache (acerto ou erro)
     const cacheStepStatus = [];
+    // Inicializa as variáveis de contagem de acertos e erros
     let hit = 0;
     let miss = 0;
 
+    // Percorre cada endereço de memória
     for (let i = 0; i < memoryAddress.length; i++) {
+      // Calcula o índice do cache para o endereço de memória atual
       const cacheIndex = memoryAddress[i] % cacheSize;
+      // Verifica se o valor do cache no índice calculado é igual ao endereço de memória atual
       const hitValue = cache[cacheIndex] === memoryAddress[i];
+      // Cria um objeto para armazenar o valor do endereço de memória, o índice do cache e se houve acerto
       const access = {
         value: memoryAddress[i],
         cacheIndex: cacheIndex,
         hit: hitValue,
       };
+
+      // Se houver acerto, incrementa o contador de acertos
       if (hitValue) {
         hit++;
       } else {
+        // Se houver erro, atualiza o valor do cache no índice calculado com o novo endereço de memória
         cache[cacheIndex] = memoryAddress[i];
+        // Incrementa o contador de erros
         miss++;
       }
+
+      // Adiciona o estado atual do cache ao array de etapas
       cacheStep.push([...cache]);
+      // Adiciona o status do acesso atual (acerto ou erro) ao array de status das etapas
       cacheStepStatus.push(access);
     }
 
+    // definindo as variáveis `setStep` e `setStepStatus` com os arrays de etapas e status do cache, respectivamente.
     setStep(cacheStep);
     setStepStatus(cacheStepStatus);
 
+    // Retorna um objeto com o total de acertos, erros, taxa de acertos e os endereços de memória
     return {
       hit,
       miss,
@@ -79,6 +98,110 @@ function App() {
       memoryAddress,
     };
   };
+
+  const createAssociativeCacheAndMemory = (
+    sets,
+    blocksPerSet,
+    wordsPerBlock
+  ) => {
+    const cache = {};
+
+    // Variáveis para acompanhar os conjuntos e as tags atuais
+    let lruSetIndex = 0;
+    let lruBlockIndex = 0;
+
+    // Percorre os conjuntos
+    for (let setIndex = 0; setIndex < sets; setIndex++) {
+      cache[setIndex] = {};
+
+      // Percorre os blocos dentro de cada conjunto
+      for (let blockIndex = 0; blockIndex < blocksPerSet; blockIndex++) {
+        cache[setIndex][blockIndex] = {};
+
+        // Define a tag do bloco
+        const blockTag = `${setIndex}:${blockIndex}`;
+
+        // Percorre as palavras dentro de cada bloco
+        for (let wordIndex = 0; wordIndex < wordsPerBlock; wordIndex++) {
+          // Define o valor inicial como -1
+          cache[setIndex][blockIndex][wordIndex] = -1;
+        }
+
+        // Armazena a tag do bloco
+        cache[setIndex][blockIndex].tag = blockTag;
+        // Armazena a informação de LRU no bloco
+        cache[setIndex][blockIndex].timestamp = 0;
+      }
+    }
+
+    //cria a memoria principal com os endereços de memória
+
+    const createMemory = (memoryAddress) => {
+      const memory = {};
+
+      for (let setIndex = 0; setIndex < memoryAddress.length; setIndex++) {
+        for (let blockIndex = 0; blockIndex < blocksPerSet; blockIndex++) {
+          for (let wordIndex = 0; wordIndex < wordsPerBlock; wordIndex++) {
+            const address = `${setIndex}:${blockIndex}:${wordIndex}`;
+            const memoryIndex =
+              setIndex * (blocksPerSet * wordsPerBlock) +
+              blockIndex * wordsPerBlock +
+              wordIndex;
+            memory[address] = memoryAddress[memoryIndex];
+          }
+        }
+      }
+
+      return memory;
+    };
+    // Função auxiliar para atualizar o timestamp do bloco
+    const updateLRU = (setIndex, blockIndex, timestamp) => {
+      cache[setIndex][blockIndex].timestamp = timestamp;
+    };
+
+    // Função auxiliar para encontrar o bloco LRU
+    const findLRUBlock = () => {
+      let minTimestamp = Infinity;
+      let lruSetIndex = null;
+      let lruBlockIndex = null;
+
+      // Percorre os conjuntos
+      for (let setIndex = 0; setIndex < sets; setIndex++) {
+        // Percorre os blocos dentro de cada conjunto
+        for (let blockIndex = 0; blockIndex < blocksPerSet; blockIndex++) {
+          const blockTimestamp = cache[setIndex][blockIndex].timestamp;
+
+          // Encontra o bloco com o menor timestamp
+          if (blockTimestamp < minTimestamp) {
+            minTimestamp = blockTimestamp;
+            lruSetIndex = setIndex;
+            lruBlockIndex = blockIndex;
+          }
+        }
+      }
+
+      return { setIndex: lruSetIndex, blockIndex: lruBlockIndex };
+    };
+
+    // Função para realizar a substituição LRU
+    const replaceLRU = () => {
+      const lruBlock = findLRUBlock();
+      return lruBlock;
+    };
+
+    return { cache, createMemory, updateLRU, replaceLRU };
+  };
+
+  // Exemplo de uso
+  const sets = 2;
+  const blocksPerSet = 2;
+  const wordsPerBlock = 2;
+
+  const { cache, createMemory, updateLRU, replaceLRU } =
+    createAssociativeCacheAndMemory(sets, blocksPerSet, wordsPerBlock);
+  const mem = createMemory([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+  console.log(mem);
+  console.log(cache);
 
   const handleDirectMappingCache = (event) => {
     const sumary = directMappingCache(
@@ -186,11 +309,6 @@ function App() {
       replacementPolicy: "RANDOM",
     },
   ];
-
-  // for (let i = 0; i < 16; i++) {
-  //   let binaryNumber = i.toString(2).padStart(4, "0");
-  //   console.log(binaryNumber);
-  // }
 
   useEffect(() => {
     const sumary = directMappingCache(memObj[0].data, memObj[0].cacheSize);
