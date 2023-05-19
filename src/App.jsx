@@ -187,6 +187,11 @@ function App() {
     },
   ];
 
+  // for (let i = 0; i < 16; i++) {
+  //   let binaryNumber = i.toString(2).padStart(4, "0");
+  //   console.log(binaryNumber);
+  // }
+
   useEffect(() => {
     const sumary = directMappingCache(memObj[0].data, memObj[0].cacheSize);
     setSummary(sumary);
